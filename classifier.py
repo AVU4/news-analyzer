@@ -198,7 +198,7 @@ def build_model(nb_classes,
 
     lstm_1 = Bidirectional(LSTM(128, name='blstm_1',
                                 activation='tanh',
-                                recurrent_activation='hard_sigmoid',
+                                recurrent_activation='sigmoid',
                                 recurrent_dropout=0.0,
                                 dropout=0.5,
                                 kernel_initializer='glorot_uniform',
