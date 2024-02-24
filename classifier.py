@@ -33,7 +33,8 @@ TRAIN_FILE = 'train_set.csv'
 TRAIN_LABS = 'train_set_labels_small.csv'
 EMBEDDING_FILE = '/home/avu/Pycharm/Document-Classifier-LSTM/glove.6B.200d.txt'
 # The maximum number of words to be used. (most frequent)
-MAX_NB_WORDS = 100000
+MAX_NB_WORDS = 300000
+    #331250
 # Max number of words in each abstract.
 MAX_SEQUENCE_LENGTH = 1000  # MAYBE BIGGER
 # This is fixed.
@@ -73,7 +74,7 @@ def f1_score(y_true, y_pred):
     return tf.reduce_mean(f_score)
 
 def load_data_test(set):
-    class_file = open('class_dict.json', 'r')
+    class_file = open('versions/v1/class_dict.json', 'r')
     class_json = json.load(class_file)
 
     X_data = []
@@ -86,7 +87,7 @@ def load_data_test(set):
             y_data.append(target)
             counter += 1
 
-    file = open('tokenizer.json', 'r')
+    file = open('versions/v1/tokenizer.json', 'r')
     config = json.loads(file.read())
     tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(config)
 
@@ -327,7 +328,7 @@ if __name__ == '__main__':
                                    patience=5,
                                    verbose=1,
                                    mode='max',
-                                   start_from_epoch=5)
+                                   start_from_epoch=50)
     bst_model_path = STAMP + '.h5'
     model_checkpoint = ModelCheckpoint(bst_model_path,
                                        monitor=monitor_metric,
