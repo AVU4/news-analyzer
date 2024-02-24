@@ -28,7 +28,7 @@ from attention import AttentionWithContext
 from data_gen import Corpus
 
 # Modify this paths as well
-DATA_DIR = '/home/avu/Pycharm/Document-Classifier-LSTM/data/'
+DATA_DIR = '/home/avu/Pycharm/news-analyzer/models/blstm/data/'
 TRAIN_FILE = 'train_set.csv'
 TRAIN_LABS = 'train_set_labels_small.csv'
 EMBEDDING_FILE = '/home/avu/Pycharm/Document-Classifier-LSTM/glove.6B.200d.txt'
@@ -72,6 +72,46 @@ def f1_score(y_true, y_pred):
 
     return tf.reduce_mean(f_score)
 
+def load_data_test(set):
+    class_file = open('class_dict.json', 'r')
+    class_json = json.load(class_file)
+
+    X_data = []
+    y_data = []
+
+    counter = 0
+    for c, (vector, target) in enumerate(set):
+        if target[0] in class_json:
+            X_data.append(vector)
+            y_data.append(target)
+            counter += 1
+
+    file = open('tokenizer.json', 'r')
+    config = json.loads(file.read())
+    tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(config)
+
+    X_data = tokenizer.texts_to_sequences(X_data)
+
+    X_data = pad_sequences(X_data,
+                           maxlen=MAX_SEQUENCE_LENGTH,
+                           padding='post',
+                           truncating='post',
+                           dtype='float32')
+
+
+
+    y_data_int = []
+    for y_seq in y_data:
+        for y in y_seq:
+            class_label = class_json[y]
+            y_data_int.append([class_label])
+
+    mlb = MultiLabelBinarizer()
+    mlb.fit([list(class_json.values())])
+    y_data = mlb.transform(y_data_int)
+
+    return X_data, y_data
+
 
 def load_data(train_set):
     """
@@ -80,7 +120,7 @@ def load_data(train_set):
     X_data = []
     y_data = []
     for c, (vector, target) in enumerate(train_set):
-        if c % 20 == 0:
+        if c % 8 == 0:
             X_data.append(vector)
             y_data.append(target)
             if c % 10000 == 0:
@@ -121,6 +161,10 @@ def load_data(train_set):
     with open('word_index.json', 'w') as fp:
         json.dump(word_index, fp)
     print('Exported word dictionary')
+
+    with open('tokenizer.json', 'w') as file:
+        tokenizer_json = tokenizer.to_json()
+        json.dump(tokenizer_json, file)
 
     mlb = MultiLabelBinarizer()
     mlb.fit([list(class_dict.values())])
@@ -245,7 +289,7 @@ def load_model(stamp):
 
     model.summary()
 
-    adam = Adam(lr=0.001)
+    adam = Adam(learning_rate=0.001)
     model.compile(loss='binary_crossentropy',
                   optimizer=adam,
                   metrics=[f1_score])
@@ -277,10 +321,13 @@ if __name__ == '__main__':
                             MAX_SEQUENCE_LENGTH,
                             STAMP)
 
-    monitor_metric = 'val_f1_score'
+    monitor_metric = 'f1_score'
 
     early_stopping = EarlyStopping(monitor=monitor_metric,
-                                   patience=5)
+                                   patience=5,
+                                   verbose=1,
+                                   mode='max',
+                                   start_from_epoch=5)
     bst_model_path = STAMP + '.h5'
     model_checkpoint = ModelCheckpoint(bst_model_path,
                                        monitor=monitor_metric,
@@ -292,7 +339,7 @@ if __name__ == '__main__':
     hist = model.fit(X_train, y_train,
                      validation_data=(X_val, y_val),
                      epochs=100000,
-                     batch_size=4,
+                     batch_size=8,
                      shuffle=True,
                      callbacks=[model_checkpoint, early_stopping])
 

@@ -4,3 +4,4 @@ __pycache__
 /doc_blstm.json
 /word_index.json
 /doc_blstm.h5
+/tokenizer.json
