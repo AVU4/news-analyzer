@@ -16,7 +16,7 @@ def get_y_values(X_test):
 
 if __name__ == "__main__":
 
-    model = lm('versions/v1/doc_blstm')
+    model = lm('versions/v2/doc_blstm')
 
     DATA_DIR = '/home/avu/Pycharm/news-analyzer/models/blstm/data/'
     corpus = Corpus(DATA_DIR + 'test_set.csv', DATA_DIR + 'test_set_labels_small.csv')

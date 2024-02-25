@@ -74,7 +74,7 @@ def f1_score(y_true, y_pred):
     return tf.reduce_mean(f_score)
 
 def load_data_test(set):
-    class_file = open('versions/v1/class_dict.json', 'r')
+    class_file = open('versions/v2/class_dict.json', 'r')
     class_json = json.load(class_file)
 
     X_data = []
@@ -87,7 +87,7 @@ def load_data_test(set):
             y_data.append(target)
             counter += 1
 
-    file = open('versions/v1/tokenizer.json', 'r')
+    file = open('versions/v2/tokenizer.json', 'r')
     config = json.loads(file.read())
     tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(config)
 
